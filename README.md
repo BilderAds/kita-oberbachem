@@ -10,24 +10,27 @@ Prototyp der Homepage. Komplette Seite als statisches HTML mit Tailwind-freiem C
 
 ```
 .
+├── index.html       Semantische Homepage mit SEO-Tags und JSON-LD
+├── style.css        Palette, Typografie, Layout, Komponenten
+├── main.js          Three.js Hero, Custom Cursor, Scroll-Reveal, Nav-State
+├── robots.txt
+├── sitemap.xml
+├── vercel.json      Deployment Config fuer Vercel
 ├── briefing.md      Projekt-Briefing, Modus, Zielgruppe, Seitenvorschlag
-├── research.md      Deep Research mit allen oeffentlich recherchierten Infos
-└── website/
-    ├── index.html   Semantische Homepage mit SEO-Tags und JSON-LD
-    ├── style.css    Palette, Typografie, Layout, Komponenten
-    ├── main.js      Three.js Hero, Custom Cursor, Scroll-Reveal, Nav-State
-    ├── robots.txt
-    └── sitemap.xml
+└── research.md      Deep Research mit allen oeffentlich recherchierten Infos
 ```
 
 ## Lokal starten
 
 ```bash
-cd website
 python3 -m http.server 4321
 ```
 
 Dann [http://localhost:4321](http://localhost:4321) oeffnen.
+
+## Deployment
+
+Vercel erkennt das Repo als Static Site. Push auf `main` reicht, `vercel.json` regelt Clean URLs und Caching.
 
 ## Tech-Entscheidungen
 
