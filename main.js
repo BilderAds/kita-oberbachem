@@ -11,12 +11,21 @@ import * as THREE from "three";
   const canvas = document.getElementById("webgl");
   if (!canvas) return;
 
+  const getCanvasSize = () => {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      width: rect.width || window.innerWidth,
+      height: rect.height || window.innerHeight
+    };
+  };
+
+  const initialSize = getCanvasSize();
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const camera = new THREE.PerspectiveCamera(25, initialSize.width / initialSize.height, 0.1, 1000);
   camera.position.z = 24;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(initialSize.width, initialSize.height, false);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -170,12 +179,11 @@ import * as THREE from "three";
       group.position.y = -0.4;
       group.scale.setScalar(1);
     } else {
-      // Mobile: balls drift through the upper and middle band, smaller scale
-      // so they sit as decorative backdrop behind the copy instead of
-      // dominating or disappearing above the gradient.
-      group.position.x = 0.6;
-      group.position.y = 2.6;
-      group.scale.setScalar(0.48);
+      // Mobile and tablet: canvas has a fixed banner height, balls are
+      // centered within it (no vertical offset needed).
+      group.position.x = 0;
+      group.position.y = 0;
+      group.scale.setScalar(window.innerWidth > 640 ? 0.85 : 0.75);
     }
   };
   placeGroup();
@@ -312,9 +320,10 @@ import * as THREE from "three";
   };
 
   const handleResize = () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    const size = getCanvasSize();
+    camera.aspect = size.width / size.height;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(size.width, size.height, false);
     placeGroup();
   };
   window.addEventListener("resize", handleResize);
