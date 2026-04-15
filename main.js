@@ -170,11 +170,12 @@ import * as THREE from "three";
       group.position.y = -0.4;
       group.scale.setScalar(1);
     } else {
-      // Mobile: push spheres firmly into the upper third, scale down so they
-      // sit above the text without bleeding through the gradient overlay.
-      group.position.x = 0;
-      group.position.y = 7.8;
-      group.scale.setScalar(0.62);
+      // Mobile: balls drift through the upper and middle band, smaller scale
+      // so they sit as decorative backdrop behind the copy instead of
+      // dominating or disappearing above the gradient.
+      group.position.x = 0.6;
+      group.position.y = 2.6;
+      group.scale.setScalar(0.48);
     }
   };
   placeGroup();
