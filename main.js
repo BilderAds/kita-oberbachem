@@ -27,8 +27,6 @@ import * as THREE from "three";
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setSize(initialSize.width, initialSize.height, false);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   // ---- Camera rotation state
   let isMouseDown = false;
@@ -124,30 +122,36 @@ import * as THREE from "three";
     { x: 6.2, y: 0.5, z: -0.8 }, { x: 4, y: 0.08, z: 1.8 }
   ];
 
-  // Kita colour palette. We build a small palette and assign per-sphere.
-  const palette = [
-    { color: "#2d4a2b", emissive: "#1a2d18" }, // wald tief
-    { color: "#3f6337", emissive: "#2d4a2b" }, // wald hell
-    { color: "#8cb369", emissive: "#5d8043" }, // blatt
-    { color: "#e8833a", emissive: "#b35818" }, // terrakotta
-    { color: "#f4d35e", emissive: "#c9a33a" }, // sonne
-    { color: "#5b8db8", emissive: "#35607e" }, // himmel
-    { color: "#d6c6a8", emissive: "#9e8e6f" }  // sand
+  // Emoji mix fuer die Kita-Welt. Natur, Tiere, Spielzeug, Kreatives, Fahrzeuge.
+  const emojis = [
+    "🎈", "🌳", "⚽", "🏀", "🦕", "🐻", "🎨", "🌟",
+    "🚗", "📚", "🦒", "🐶", "🌈", "🦋", "🍎", "🎵",
+    "🐸", "🌻", "🧸", "🍭", "🚂", "🦖", "🐝", "🎪"
   ];
 
-  const materials = palette.map(p => new THREE.MeshPhongMaterial({
-    color: new THREE.Color(p.color),
-    emissive: new THREE.Color(p.emissive),
-    emissiveIntensity: 0.15,
-    shininess: 28,
-    specular: new THREE.Color("#ffffff")
-  }));
+  // Renders an emoji onto a transparent canvas and returns a Three.js texture.
+  const makeEmojiTexture = (emoji) => {
+    const size = 256;
+    const c = document.createElement("canvas");
+    c.width = size;
+    c.height = size;
+    const ctx = c.getContext("2d");
+    ctx.font = `${Math.round(size * 0.78)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    // Nudge baseline so emoji sits optically centred
+    ctx.fillText(emoji, size / 2, size / 2 + size * 0.04);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    tex.needsUpdate = true;
+    return tex;
+  };
+
+  const emojiTextures = emojis.map(makeEmojiTexture);
 
   const group = new THREE.Group();
   const spheres = [];
-
-  // Deterministic colour distribution so repeat loads look stable.
-  const colorOrder = [0, 3, 2, 4, 5, 1, 6];
 
   // Thin the crowd: keep roughly every second sphere plus the biggest anchors.
   // Produces a lighter, airier arrangement that is easier to read over.
@@ -161,15 +165,19 @@ import * as THREE from "three";
 
   usedPositions.forEach((pos, index) => {
     const radius = usedRadii[index] ?? 0.5;
-    const geometry = new THREE.SphereGeometry(radius, 48, 48);
-    const material = materials[colorOrder[index % colorOrder.length]];
-    const sphere = new THREE.Mesh(geometry, material);
-    sphere.position.set(pos.x, pos.y, pos.z);
-    sphere.userData = { originalPosition: { ...pos }, radius };
-    sphere.castShadow = true;
-    sphere.receiveShadow = true;
-    spheres.push(sphere);
-    group.add(sphere);
+    const material = new THREE.SpriteMaterial({
+      map: emojiTextures[index % emojiTextures.length],
+      transparent: true,
+      depthWrite: false
+    });
+    const sprite = new THREE.Sprite(material);
+    sprite.position.set(pos.x, pos.y, pos.z);
+    // Sprites need roughly 2.4x the radius to visually match the old spheres.
+    const s = Math.max(0.55, radius * 2.4);
+    sprite.scale.set(s, s, 1);
+    sprite.userData = { originalPosition: { ...pos }, radius: s * 0.5 };
+    spheres.push(sprite);
+    group.add(sprite);
   });
 
   // Shift the whole group a touch to the right on desktop so the copy has air.
@@ -189,22 +197,8 @@ import * as THREE from "three";
   placeGroup();
   scene.add(group);
 
-  // ---- Lighting warm and soft
-  const ambient = new THREE.AmbientLight(0xfff6e0, 0.85);
-  scene.add(ambient);
-
-  const key = new THREE.DirectionalLight(0xffe9b8, 1.05);
-  key.position.set(10, 16, 18);
-  key.castShadow = true;
-  scene.add(key);
-
-  const fill = new THREE.DirectionalLight(0xcbe1ff, 0.45);
-  fill.position.set(-14, 6, 8);
-  scene.add(fill);
-
-  const rim = new THREE.DirectionalLight(0xffb76b, 0.45);
-  rim.position.set(-6, -8, -10);
-  scene.add(rim);
+  // Sprites werden nicht von Licht beleuchtet, daher kein Setup noetig.
+  // Der CanvasTexture-Emoji bringt seine eigenen Farben mit.
 
   // ---- Animation helpers
   const lerp = (start, end, factor) => start + (end - start) * factor;
