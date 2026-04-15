@@ -187,11 +187,11 @@ import * as THREE from "three";
       group.position.y = -0.4;
       group.scale.setScalar(1);
     } else {
-      // Mobile and tablet: canvas has a fixed banner height, balls are
-      // centered within it (no vertical offset needed).
+      // Mobile und Tablet: Canvas hat Aspect-Ratio 5:3. Emojis fuellen die
+      // komplette Flaeche und ragen unten leicht in den Text-Bereich.
       group.position.x = 0;
       group.position.y = 0;
-      group.scale.setScalar(window.innerWidth > 640 ? 0.85 : 0.75);
+      group.scale.setScalar(window.innerWidth > 640 ? 1.15 : 1.05);
     }
   };
   placeGroup();
