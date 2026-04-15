@@ -869,17 +869,17 @@ button:focus-visible,
 
 .value-card:hover::before { opacity: 1; }
 
-.value-card-accent {
+.value-card.value-card-accent {
   background: var(--wald);
   border-color: var(--wald);
   color: var(--creme);
 }
 
-.value-card-accent .value-num { color: var(--sonne); }
-.value-card-accent h3 { color: var(--creme); }
-.value-card-accent p { color: rgba(250, 246, 237, 0.82); }
-.value-card-accent::before { background: var(--sonne); }
-.value-card-accent:hover { border-color: var(--wald-deep); background: var(--wald-deep); }
+.value-card.value-card-accent .value-num { color: var(--sonne); }
+.value-card.value-card-accent h3 { color: var(--creme); }
+.value-card.value-card-accent p { color: rgba(250, 246, 237, 0.92); }
+.value-card.value-card-accent::before { background: var(--sonne); }
+.value-card.value-card-accent:hover { border-color: var(--wald-deep); background: var(--wald-deep); }
 
 .value-num {
   font-family: var(--font-display);
